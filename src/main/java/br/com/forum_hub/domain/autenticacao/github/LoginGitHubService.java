@@ -28,7 +28,7 @@ public class LoginGitHubService {
     }
 
 
-    public String obterToken(String code) {
+    private String obterToken(String code) {
         var resposta = restClient.post()
                 .uri("https://github.com/login/oauth/access_token")
                 .contentType(MediaType.APPLICATION_JSON)
