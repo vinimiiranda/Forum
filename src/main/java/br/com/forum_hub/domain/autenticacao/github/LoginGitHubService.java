@@ -49,8 +49,13 @@ public class LoginGitHubService {
                 .uri("https://api.github.com/user/emails")
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().body(String.class);
-        return resposta;
+                .retrieve().body(DadosEmail[].class);
+
+        for (DadosEmail d : resposta) {
+            if (d.primary() && d.verified())
+                return d.email();
+        }
+        return null;
     }
 
 
