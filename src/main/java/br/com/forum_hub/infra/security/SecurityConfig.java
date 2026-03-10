@@ -31,7 +31,7 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(
                         req -> {
-                            req.requestMatchers("/login", "/atualizar-token", "/registrar", "verificar-conta").permitAll();
+                            req.requestMatchers("/login/**", "/atualizar-token", "/registrar", "verificar-conta").permitAll();
 
                             req.requestMatchers(HttpMethod.GET, "/cursos").permitAll();
                             req.requestMatchers(HttpMethod.GET, "/topicos/**").permitAll();
