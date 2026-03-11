@@ -32,8 +32,41 @@ public class LoginGitHubController {
 
 
     @GetMapping("/autorizado")
-    public ResponseEntity<String> obterToken(@RequestParam String code) {
-        var token = loginGitHubService.obterToken(code);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<DadosToken> autenticarUsuarioOauth(@RequestParam String code) {
+        var email = loginGitHubService.obterEmail(code);
+        var usuario = (Usuario) usuarioService.loadUserByUsername(email);
+        var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String tokenAcesso = tokenService.gerarToken((Usuario) authentication.getPrincipal());
+
+        String refreshToken = tokenService.gerarRefreshToken((Usuario) authentication.getPrincipal());
+
+        return ResponseEntity.ok(new DadosToken(tokenAcesso, refreshToken));
+
+    }
+
+    @GetMapping("/registro")
+    public ResponseEntity<Void> redirecionarRegistroGithub() {
+        var url = loginGitHubService.gerarUrl();
+        var headers = new HttpHeaders();
+
+        headers.setLocation(URI.create(url));
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/registro-autorizado")
+    public ResponseEntity<DadosToken> registrarOAuth(@RequestParam String code) {
+        var dadosUsuario = loginGitHubService.obterDadosOAuth(code);
+        var usuario = usuarioService.cadastrarVerificado(dadosUsuario);
+        var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String tokenAcesso = tokenService.gerarToken(usuario);
+        String refreshToken = tokenService.gerarRefreshToken(usuario);
+
+        return ResponseEntity.ok(new DadosToken(tokenAcesso, refreshToken));
     }
 }
