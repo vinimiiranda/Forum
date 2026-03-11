@@ -1,9 +1,16 @@
 package br.com.forum_hub.controller;
 
+import br.com.forum_hub.domain.autenticacao.DadosToken;
+import br.com.forum_hub.domain.autenticacao.TokenService;
 import br.com.forum_hub.domain.autenticacao.github.LoginGitHubService;
+import br.com.forum_hub.domain.usuario.Usuario;
+import br.com.forum_hub.domain.usuario.UsuarioRepository;
+import br.com.forum_hub.domain.usuario.UsuarioService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,9 +23,15 @@ import java.net.URI;
 public class LoginGitHubController {
 
     private final LoginGitHubService loginGitHubService;
+    private final UsuarioRepository usuarioRepository;
+    private final TokenService tokenService;
+    private final UsuarioService usuarioService;
 
-    public LoginGitHubController(LoginGitHubService loginGitHubService) {
+    public LoginGitHubController(LoginGitHubService loginGitHubService, UsuarioRepository usuarioRepository, TokenService tokenService, UsuarioService usuarioService) {
         this.loginGitHubService = loginGitHubService;
+        this.usuarioRepository = usuarioRepository;
+        this.tokenService = tokenService;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping
