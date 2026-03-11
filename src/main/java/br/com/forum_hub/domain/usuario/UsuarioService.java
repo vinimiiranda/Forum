@@ -25,7 +25,6 @@ public class UsuarioService implements UserDetailsService {
     private final PerfilRepository perfilRepository;
     private final HierarquiaService hierarquiaService;
 
-
     public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, EmailService emailService, PerfilRepository perfilRepository, HierarquiaService hierarquiaService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
@@ -65,7 +64,6 @@ public class UsuarioService implements UserDetailsService {
     public Usuario buscarPeloNomeUsuario(String nomeUsuario) {
         return usuarioRepository.findByNomeUsuarioIgnoreCaseAndVerificadoTrueAndAtivoTrue(nomeUsuario).orElseThrow(
                 () -> new RegraDeNegocioException("Usuário não encontrado!"));
-
     }
 
     @Transactional
@@ -109,5 +107,18 @@ public class UsuarioService implements UserDetailsService {
     public void reativarUsuario(Long id) {
         var usuario = usuarioRepository.findById(id).orElseThrow();
         usuario.reativar();
+    }
+
+    @Transactional
+    public Usuario cadastrarVerificado(DadosCadastroUsuario dados) {
+        var usuario = criarUsuario(dados, true);
+        return usuarioRepository.save(usuario);
+    }
+
+    private Usuario criarUsuario(DadosCadastroUsuario dados, Boolean verificado) {
+        var senhaCriptografada = passwordEncoder.encode(dados.senha());
+        var perfil = perfilRepository.findByNome(PerfilNome.ESTUDANTE);
+        return new Usuario(dados,senhaCriptografada,perfil,verificado);
+
     }
 }
