@@ -50,7 +50,7 @@ public class UsuarioService implements UserDetailsService {
 
         var senhaCriptografada = passwordEncoder.encode(dados.senha());
         var perfil = perfilRepository.findByNome(PerfilNome.ESTUDANTE);
-        var usuario = new Usuario(dados, senhaCriptografada, perfil);
+        var usuario = new Usuario(dados, senhaCriptografada, perfil,false);
 
         emailService.enviarEmailVerificacao(usuario);
         return usuarioRepository.save(usuario);
