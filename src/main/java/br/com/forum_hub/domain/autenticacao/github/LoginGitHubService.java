@@ -1,6 +1,7 @@
 package br.com.forum_hub.domain.autenticacao.github;
 
 import br.com.forum_hub.domain.usuario.DadosCadastroUsuario;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,12 @@ import java.util.UUID;
 @Service
 public class LoginGitHubService {
 
-    private final String clientId = "Ov23liIS6oyuJl3lOZww";
-    private final String clientSecret = "795f35822db59f65db8c57afeedd81ffa926f85b";
+    @Value("${github.oauth.client.id}")
+    private String clientId;
+
+    @Value("${github.oauth.client.secret}")
+    private String clientSecret;
+
     private final String redirectUri = "http://localhost:8080/login/github/autorizado";
     private final RestClient restClient;
 
@@ -57,14 +62,15 @@ public class LoginGitHubService {
                 .retrieve()
                 .body(DadosEmail[].class);
 
-        for(DadosEmail d: resposta){
-            if(d.primary() && d.verified())
+        for (DadosEmail d : resposta) {
+            if (d.primary() && d.verified())
                 return d.email();
         }
         return null;
     }
-    public DadosCadastroUsuario obterDadosOAuth(String codigo){
-        var accessToken = obterToken(codigo,  clientId, redirectUri);
+
+    public DadosCadastroUsuario obterDadosOAuth(String codigo) {
+        var accessToken = obterToken(codigo, clientId, redirectUri);
         var headers = new HttpHeaders();
 
         headers.setBearerAuth(accessToken);
