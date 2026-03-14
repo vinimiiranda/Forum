@@ -4,9 +4,12 @@ import br.com.forum_hub.domain.curso.Categoria;
 import br.com.forum_hub.domain.curso.Curso;
 import br.com.forum_hub.domain.usuario.Usuario;
 import jakarta.persistence.*;
-
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+@Getter
+@NoArgsConstructor
 @Entity
 @Table(name = "topicos")
 public class Topico {
@@ -37,10 +40,7 @@ public class Topico {
     @JoinColumn(name = "curso_id")
     private Curso curso;
 
-    @Deprecated
-    public Topico(){}
-
-    public Topico(DadosCadastroTopico dados, Curso curso,Usuario autor) {
+    public Topico(DadosCadastroTopico dados, Curso curso, Usuario autor) {
         this.titulo = dados.titulo();
         this.mensagem = dados.mensagem();
         this.autor = autor;
@@ -52,46 +52,14 @@ public class Topico {
         this.curso = curso;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public String getMensagem() {
-        return mensagem;
-    }
-
-    public Usuario getAutor() {
-        return autor;
-    }
-
-    public LocalDateTime getDataCriacao() {
-        return dataCriacao;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public Curso getCurso() {
-        return curso;
-    }
-
-    public Integer getQuantidadeRespostas() {
-        return quantidadeRespostas;
-    }
-
     public Topico atualizarInformacoes(DadosAtualizacaoTopico dados, Curso curso) {
-        if(dados.titulo() != null){
+        if (dados.titulo() != null) {
             this.titulo = dados.titulo();
         }
-        if(dados.mensagem() != null){
+        if (dados.mensagem() != null) {
             this.mensagem = dados.mensagem();
         }
-        if(curso != null){
+        if (curso != null) {
             this.curso = curso;
         }
         return this;
