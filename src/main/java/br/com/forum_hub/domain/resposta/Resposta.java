@@ -1,9 +1,7 @@
 package br.com.forum_hub.domain.resposta;
 
-import br.com.forum_hub.domain.topico.Status;
 import br.com.forum_hub.domain.topico.Topico;
 import br.com.forum_hub.domain.usuario.Usuario;
-import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,9 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Getter
+@NoArgsConstructor
 @Entity
 @Table(name = "respostas")
 public class Resposta {
@@ -33,41 +35,12 @@ public class Resposta {
     @JoinColumn(name = "topico_id")
     private Topico topico;
 
-    @Deprecated
-    public Resposta() {
-    }
-
-    public Resposta(DadosCadastroResposta dados, Topico topico,Usuario autor) {
+    public Resposta(DadosCadastroResposta dados, Topico topico, Usuario autor) {
         this.mensagem = dados.mensagem();
         this.autor = autor;
         this.dataCriacao = LocalDateTime.now();
         this.solucao = false;
         this.topico = topico;
-    }
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getMensagem() {
-        return mensagem;
-    }
-
-    public Usuario getAutor() {
-        return autor;
-    }
-
-    public LocalDateTime getDataCriacao() {
-        return dataCriacao;
-    }
-
-    public Boolean ehSolucao() {
-        return solucao;
-    }
-
-    public Topico getTopico() {
-        return topico;
     }
 
     public Resposta atualizarInformacoes(DadosAtualizacaoResposta dados) {
