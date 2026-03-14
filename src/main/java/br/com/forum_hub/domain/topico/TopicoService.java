@@ -5,6 +5,7 @@ import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import br.com.forum_hub.infra.security.HierarquiaService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,18 +14,13 @@ import org.springframework.stereotype.Service;
 import java.nio.file.AccessDeniedException;
 
 @Service
+@RequiredArgsConstructor
 public class TopicoService {
 
     private final TopicoRepository repository;
     private final CursoService cursoService;
     private final HierarquiaService hierarquiaService;
 
-
-    public TopicoService(TopicoRepository repository, CursoService cursoService, HierarquiaService hierarquiaService) {
-        this.repository = repository;
-        this.cursoService = cursoService;
-        this.hierarquiaService = hierarquiaService;
-    }
 
     @Transactional
     public Topico cadastrar(DadosCadastroTopico dados, Usuario autor) {
