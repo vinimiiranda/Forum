@@ -51,12 +51,10 @@ public class LoginGitHubController {
         var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         String tokenAcesso = tokenService.gerarToken((Usuario) authentication.getPrincipal());
-
         String refreshToken = tokenService.gerarRefreshToken((Usuario) authentication.getPrincipal());
 
-        return ResponseEntity.ok(new DadosToken(tokenAcesso, refreshToken));
+        return ResponseEntity.ok(new DadosToken(tokenAcesso, refreshToken,false));
 
     }
 
@@ -80,6 +78,6 @@ public class LoginGitHubController {
         String tokenAcesso = tokenService.gerarToken(usuario);
         String refreshToken = tokenService.gerarRefreshToken(usuario);
 
-        return ResponseEntity.ok(new DadosToken(tokenAcesso, refreshToken));
+        return ResponseEntity.ok(new DadosToken(tokenAcesso, refreshToken,false));
     }
 }
