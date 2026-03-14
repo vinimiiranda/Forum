@@ -6,7 +6,9 @@ import br.com.forum_hub.domain.perfil.PerfilRepository;
 import br.com.forum_hub.infra.email.EmailService;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import br.com.forum_hub.infra.security.HierarquiaService;
+import br.com.forum_hub.infra.security.totp.TotpService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
@@ -24,19 +27,14 @@ public class UsuarioService implements UserDetailsService {
     private final EmailService emailService;
     private final PerfilRepository perfilRepository;
     private final HierarquiaService hierarquiaService;
-
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, EmailService emailService, PerfilRepository perfilRepository, HierarquiaService hierarquiaService) {
-        this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
-        this.perfilRepository = perfilRepository;
-        this.hierarquiaService = hierarquiaService;
-    }
+    private final TotpService totpService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(username)
-                .orElseThrow(() -> new UsernameNotFoundException("O usuário não foi encontrado"));
+        return usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrueAndAtivoTrue(username)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Usuário não encontrado, não verificado ou inativo"
+                ));
     }
 
     @Transactional
@@ -49,7 +47,7 @@ public class UsuarioService implements UserDetailsService {
 
         var senhaCriptografada = passwordEncoder.encode(dados.senha());
         var perfil = perfilRepository.findByNome(PerfilNome.ESTUDANTE);
-        var usuario = new Usuario(dados, senhaCriptografada, perfil,false);
+        var usuario = new Usuario(dados, senhaCriptografada, perfil, false);
 
         emailService.enviarEmailVerificacao(usuario);
         return usuarioRepository.save(usuario);
@@ -62,8 +60,8 @@ public class UsuarioService implements UserDetailsService {
     }
 
     public Usuario buscarPeloNomeUsuario(String nomeUsuario) {
-        return usuarioRepository.findByNomeUsuarioIgnoreCaseAndVerificadoTrueAndAtivoTrue(nomeUsuario).orElseThrow(
-                () -> new RegraDeNegocioException("Usuário não encontrado!"));
+        return usuarioRepository.findByNomeUsuarioIgnoreCaseAndVerificadoTrueAndAtivoTrue(nomeUsuario)
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado!"));
     }
 
     @Transactional
@@ -79,12 +77,13 @@ public class UsuarioService implements UserDetailsService {
         if (!dados.novaSenha().equals(dados.novaSenhaConfirmacao())) {
             throw new RegraDeNegocioException("Senha e confirmação não conferem!");
         }
+
         String senhaCriptografada = passwordEncoder.encode(dados.novaSenha());
         logado.alterarSenha(senhaCriptografada);
     }
 
     @Transactional
-    public void desativarUsuario(Usuario usuario) {
+    public void desativarUsuario(Long id, Usuario usuario) {
         usuario.desativar();
     }
 
@@ -118,7 +117,29 @@ public class UsuarioService implements UserDetailsService {
     private Usuario criarUsuario(DadosCadastroUsuario dados, Boolean verificado) {
         var senhaCriptografada = passwordEncoder.encode(dados.senha());
         var perfil = perfilRepository.findByNome(PerfilNome.ESTUDANTE);
-        return new Usuario(dados,senhaCriptografada,perfil,verificado);
+        return new Usuario(dados, senhaCriptografada, perfil, verificado);
+    }
 
+    @Transactional
+    public String gerarQrCode(Usuario logado) {
+        var secret = totpService.gerarSecret();
+        logado.gerarSecret(secret);
+        usuarioRepository.save(logado);
+
+        return totpService.gerarQrCode(logado);
+    }
+
+    @Transactional
+    public void ativarA2f(String codigo, Usuario logado) {
+
+        if (logado.isA2fAtiva()) {
+            throw new RegraDeNegocioException("Sua autenticação de dois fatores já esta ativa!");
+        }
+        var codigoValido = totpService.verificarCodigo(codigo,logado);
+        if (!codigoValido){
+            throw new RegraDeNegocioException("Código enválido!");
+        }
+        logado.ativarA2f();
+        usuarioRepository.save(logado);
     }
 }
