@@ -5,6 +5,7 @@ import br.com.forum_hub.domain.topico.TopicoService;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -13,16 +14,11 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RespostaService {
     private final RespostaRepository repository;
     private final TopicoService topicoService;
     private final RoleHierarchy roleHierarchy;
-
-    public RespostaService(RespostaRepository repository, TopicoService topicoService, RoleHierarchy roleHierarchy) {
-        this.repository = repository;
-        this.topicoService = topicoService;
-        this.roleHierarchy = roleHierarchy;
-    }
 
     @Transactional
     public Resposta cadastrar(DadosCadastroResposta dados, Long idTopico, Usuario autor) {
@@ -90,7 +86,7 @@ public class RespostaService {
         topico.decrementarRespostas();
         if (topico.getQuantidadeRespostas() == 0)
             topico.alterarStatus(Status.NAO_RESPONDIDO);
-        else if (resposta.ehSolucao())
+        else if (resposta.getSolucao())
             topico.alterarStatus(Status.RESPONDIDO);
     }
 
