@@ -162,7 +162,7 @@ Principais métodos HTTP utilizados:
 **Vinicius de Miranda Melo**
 
 * GitHub: https://github.com/vinimiiranda
-* LinkedIn: (adicione seu link aqui)
+* LinkedIn: www.linkedin.com/in/vinicius-miranda-melo
 
 ---
 
