@@ -15,10 +15,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final String[] ROTAS_DOCUMENTACAO = {
+            "/v3/api-docs/**",
+            "/swagger-ui.html",
+            "/swagger-ui/**"
+    };
 
     private final FiltroTokenAcesso filtroTokenAcesso;
 
@@ -31,7 +36,9 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(
                         req -> {
-                            req.requestMatchers("/login/**", "/atualizar-token", "/registrar", "verificar-conta","/verificar-a2f").permitAll();
+                            req.requestMatchers(ROTAS_DOCUMENTACAO).permitAll();
+
+                            req.requestMatchers("/login/**", "/atualizar-token", "/registrar", "verificar-conta", "/verificar-a2f").permitAll();
 
                             req.requestMatchers(HttpMethod.GET, "/cursos").permitAll();
                             req.requestMatchers(HttpMethod.GET, "/topicos/**").permitAll();
@@ -68,10 +75,11 @@ public class SecurityConfig {
 
     @Bean
     public RoleHierarchy hierarchyPerfis() {
-        String hierarquia = "ROLE_ADMIN > ROLE_MODERADOR\n" +
-                "ROLE_MODERADOR > ROLE_INSTRUTOR\n" +
-                "ROLE_MODERADOR > ROLE_ESTUDANTE";
+        String hierarquia = """
+                ROLE_ADMIN > ROLE_MODERADOR
+                ROLE_MODERADOR > ROLE_INSTRUTOR
+                ROLE_MODERADOR > ROLE_ESTUDANTE
+                """;
         return RoleHierarchyImpl.fromHierarchy(hierarquia);
     }
-
 }
