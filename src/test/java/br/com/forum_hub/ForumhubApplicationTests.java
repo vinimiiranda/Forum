@@ -1,13 +1,13 @@
 package br.com.forum_hub;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class ForumhubApplicationTests {
+@DisplayName("Contexto da aplicacao")
+class ForumhubApplicationTests extends AbstractIntegrationTest {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    @DisplayName("deve subir o contexto e aplicar todas as migrations do Flyway")
+    void contextLoads() {
+    }
 }
